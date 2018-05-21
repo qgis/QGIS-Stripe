@@ -1,17 +1,31 @@
 {% extends "layout.html" %}
 {% block content %}
-  <form action="charge" method="post">
-    <article>
-      <label>
-        <span>Amount is $5.00</span>
-      </label>
-    </article>
+<style>
+    /* QGIS like */
+    body {
+        font: 62.5%/1.5 "Open Sans", "Helvetica Neue", Ubuntu, Arial, sans-serif;
+    }
+</style>
+<script src="https://js.stripe.com/v3/"></script>
+<script src="https://qgis.org/en/_static/jquery.js"></script>
 
-    <script src="https://checkout.stripe.com/checkout.js" class="stripe-button"
-            data-key="{{ key }}"
-            data-label="QGIS Donation!"
-            data-description="A Flask Charge"
+<h3>Stripe TEST Page</h3>
+<p>We us the stripe.com service to receive credit card donations. No signup needed.</p>
+<div id="stripe">If you do not see a Payment Form here please let us know via finance@qgis.org.<!-- content gets injected here via js in languagescript.html --></div>
 
-            data-locale="auto"></script>
-  </form>
+<div id="thankyou" style="display:none">
+    <div id="thankyoucontent">
+    <h2>Thank you!</h2>
+        <div class="container">
+        <p id="stripemsg">QGIS is free of charge and we hope that you enjoy using our labour of love and encourage you to share and spread your downloaded copy far and wide so that others may enjoy it too. Our very best regards!</p>
+        <p id="stripeerr" style="display:none;">Unfortunately there was an error processing your Donation. Please try again later, or contact us via finance@qgis.org</p>
+        </div>
+    </div>
+</div>
+
+<script>
+ // get the form and inject it in the #stripe div
+ $.get( "{{ stripeformurl }}", function( data ) { $( "#stripe" ).html( data ); });
+</script>
+
 {% endblock %}

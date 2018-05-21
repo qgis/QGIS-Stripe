@@ -5,12 +5,20 @@
 """
 import os
 
-# Stripe PUBLISHABLE_KEY
-PUBLISHABLE_KEY = os.environ.get('PUBLISHABLE_KEY') \
-    if os.environ.get('PUBLISHABLE_KEY', False) else \
+# Stripe PUBLISHABLE_KEY (offical Stripe TEST key)
+STRIPE_PUBLISHABLE_KEY = os.environ.get('STRIPE_PUBLISHABLE_KEY') \
+    if os.environ.get('STRIPE_PUBLISHABLE_KEY', False) else \
     'pk_test_6pRNASCoBOKtIshFeQd4XMUh'
 
-# Stripe SECRET_KEY
-SECRET_KEY = os.environ.get('SECRET_KEY') \
-    if os.environ.get('SECRET_KEY', False) else \
+# Stripe SECRET_KEY (offical Stripe TEST key)
+STRIPE_SECRET_KEY = os.environ.get('STRIPE_SECRET_KEY') \
+    if os.environ.get('STRIPE_SECRET_KEY', False) else \
     'sk_test_BQokikJOvBiI2HlWgH4olfQ2'
+
+STRIPE_FORM_URL = os.environ.get('STRIPE_FORM_URL') \
+    if os.environ.get('STRIPE_FORM_URL', False) else \
+    'https://duif.net/stripe/form'
+
+STRIPE_CHARGE_URL = os.environ.get('STRIPE_CHARGE_URL') \
+    if os.environ.get('STRIPE_CHARGE_URL', False) else \
+    'https://duif.net/stripe/chargejson'

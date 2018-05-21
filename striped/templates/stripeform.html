@@ -1,0 +1,146 @@
+
+{% block content %}
+    <!-- see https://stripe.com/docs/stripe-js/reference#element-types -->
+    <style>
+        .qgis_stripe_form {
+            max-width: 500px;
+            font-size: .9rem;
+        }
+        .qgis_stripe_form img{
+            width:auto;
+            max-width: 100%;
+        }
+        .qgis_stripe_form input{
+            width:95%;
+            margin-top: 3px;
+        }
+        .qgis_stripe_form select{
+            margin-top: 3px;
+            width:98%;
+            background: #ffffff none repeat scroll 0 0;
+            border: 1px solid #9da3a6;
+            border-radius: 5px;
+            padding: 5px;
+            transition: border-color 0.15s ease 0s;
+        }
+        #card-element {
+            padding: 10px 0 10px 0;
+        }
+    </style>
+    <div class="qgis_stripe_form">
+    <img src="https://qgis.org/en/_downloads/qgis-logo.png"/>
+    <div id="stripeprocessing"></div>
+    <form _action="chargejson" method="post" id="stripeform">
+
+      <div class="form-row">
+          <input size="10" type="text" data-tid="qgis.name" name="donorname" placeholder="Name (only used in donors list)">
+      </div>
+
+      <div class="form-row">
+        <input name="email" data-tid="stripeEmail" type="email" placeholder="Email (email only used for sending receipt)" required="">
+      </div>
+
+      <div class="form-row">
+
+        <select name="amount" data-tid="qgis.amount">
+            <!-- NOTE: amount value is in CENTS !!!-->
+            <option value="eur:1000" selected>€ 10.00</option>
+            <option value="eur:2500">€ 25.00</option>
+            <option value="eur:5000">€ 50.00</option>
+            <option value="eur:10000">€ 100.00</option>
+            <option value="eur:25000">€ 250.00 (contact finance@qgis.org for higher amounts)</option>
+            <option value="usd:1000">$ 10.00</option>
+            <option value="usd:2500">$ 25.00</option>
+            <option value="usd:5000">$ 50.00</option>
+            <option value="usd:10000">$ 100.00</option>
+            <option value="usd:25000">$ 250.00 (contact finance@qgis.org for higher amounts)</option>
+        </select>
+
+      </div>
+
+      <div class="form-row">
+        <div id="card-element"><!-- A Stripe Element will be inserted here. --></div>
+        <div id="card-errors" role="alert"><!-- Used to display Element errors. --></div>
+      </div>
+
+      <button>Submit Payment Form</button>
+    </form>
+    </div>
+
+    <script>
+        var stripe = Stripe('{{ key }}');
+        var elements = stripe.elements();
+
+        // Custom styling can be passed to options when creating an Element.
+        var style = {
+          base: {
+            fontSize: '16px',
+          }
+        };
+
+        // Create an instance of the card Element.
+        var card = elements.create('card', {style: style, hidePostalCode:true});
+
+        // Add an instance of the card Element into the `card-element` <div>.
+        card.mount('#card-element');
+
+        card.addEventListener('change', function(event) {
+          var displayError = document.getElementById('card-errors');
+          if (event.error) {
+            displayError.textContent = event.error.message;
+          } else {
+            displayError.textContent = '';
+          }
+        });
+
+        // Create a token or display an error when the form is submitted.
+        var form = document.getElementById('stripeform');
+        form.addEventListener('submit', function(event) {
+          event.preventDefault();
+
+          stripe.createToken(card).then(function(result) {
+            if (result.error) {
+              // Inform the customer that there was an error.
+              var errorElement = document.getElementById('card-errors');
+              errorElement.textContent = result.error.message;
+            } else {
+              // Send the token to your server.
+              stripeTokenHandler(result.token);
+            }
+          });
+        });
+
+        function stripeTokenHandler(token) {
+          // Insert the token ID into the form so it gets submitted to the server
+          var form = document.getElementById('stripeform');
+          var hiddenInput = document.createElement('input');
+          hiddenInput.setAttribute('type', 'hidden');
+          hiddenInput.setAttribute('name', 'stripeToken');
+          hiddenInput.setAttribute('value', token.id);
+          form.appendChild(hiddenInput);
+
+          // Submit the form via ajax call, but first hide form and show 'waiting' msg
+          $('#stripeform').hide();
+          $('#stripeprocessing').html('<p><b>PROCESSING PAYMENT REQUEST ...</b></p>');
+          $.post( '{{ stripechargeurl }}', $('form#stripeform').serialize(), function(data) {
+              console.log(data);
+              if (data.result=='ok'){
+                  $('#stripemsg').prepend('<p>'+data.donation+'</p>');
+                  $('#thankyou').show();
+                  $('#stripeprocessing').html('<p><b>Reload page to donate again :-)</b></p>');
+              }
+              else if (data.result=='error') {
+                  // data.result.errormsg
+                  $('#stripemsg').hide();
+                  $('#stripeerr').show();
+                  $('#thankyou').show();
+              }
+            },
+            'json' // I expect a JSON response
+          );
+          return false; // else the page is submitted!
+        }
+
+    </script>
+
+{% endblock %}
