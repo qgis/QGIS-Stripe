@@ -17,8 +17,8 @@ STRIPE_SECRET_KEY = os.environ.get('STRIPE_SECRET_KEY') \
 
 STRIPE_FORM_URL = os.environ.get('STRIPE_FORM_URL') \
     if os.environ.get('STRIPE_FORM_URL', False) else \
-    'https://duif.net/stripe/form'
+    '/stripe/form'
 
 STRIPE_CHARGE_URL = os.environ.get('STRIPE_CHARGE_URL') \
     if os.environ.get('STRIPE_CHARGE_URL', False) else \
-    'https://duif.net/stripe/chargejson'
+    '/stripe/chargejson'
