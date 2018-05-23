@@ -3,11 +3,8 @@ web:
   dockerfile: Dockerfile
   hostname: web
   container_name: qgis_striped
-  environment:
-    - PGUSER=docker
-    - PGPASSWORD=docker
-    - PGHOST=db
   ports:
     - "8000:8000"
   volumes:
     - ./striped:/striped
+    - ./logs:/logs

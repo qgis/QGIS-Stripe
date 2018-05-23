@@ -16,11 +16,10 @@ app.config.from_object(config.default)
 app.config.from_envvar('QGIS_STRIPED_SETTINGS', silent=True)
 
 # or from an application.cfg (python file) 
-app.config.from_pyfile('application.cfg', silent=True)
+app.config.from_pyfile('config/live.py', silent=True)
 
 # set strip secret key
 stripe.api_key = app.config['STRIPE_SECRET_KEY']
-
 
 # Don't import actual view methods themselves - see:
 # http://flask.pocoo.org/docs/patterns/packages/#larger-applications

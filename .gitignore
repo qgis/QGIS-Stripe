@@ -1,5 +1,7 @@
 .idea
 temp
+config/live.py
+logs/*
 
 # Created by .ignore support plugin (hsz.mobi)
 ### Python template

@@ -16,13 +16,15 @@ def index():
 @app.route('/test')
 def test():
     # make sure you have the properties STRIPE_PUBLISHABLE_KEY and STRIPE_FORM_URL in your config !
-    return render_template('index.html', key=app.config['STRIPE_PUBLISHABLE_KEY'],
+    return render_template('index.html',
+                           key=app.config['STRIPE_PUBLISHABLE_KEY'],
                            stripeformurl=app.config['STRIPE_FORM_URL'])
 
 @app.route('/form')
 def form():
     # make sure you have the properties STRIPE_PUBLISHABLE_KEY and STRIPE_CHARGE_URL in your config !
-    return render_template('stripeform.html', key=app.config['STRIPE_PUBLISHABLE_KEY'],
+    return render_template('stripeform.html',
+                           key=app.config['STRIPE_PUBLISHABLE_KEY'],
                            stripechargeurl=app.config['STRIPE_CHARGE_URL'])
 
 @app.route('/chargejson', methods=['POST'])

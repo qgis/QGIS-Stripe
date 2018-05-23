@@ -28,9 +28,14 @@
         }
     </style>
     <div class="qgis_stripe_form">
+        {% if 'test' in key %}
+            <h2 style="background-color:red;">- - - USING TEST KEYS!! - - -</h2>
+        {% endif %}
+    </div>
+    <div class="qgis_stripe_form">
     <img src="https://qgis.org/en/_downloads/qgis-logo.png"/>
-    <div id="stripeprocessing"></div>
-    <form _action="chargejson" method="post" id="stripeform">
+    <div id="stripeprocessing"><!-- placeholder for processing message --></div>
+    <form id="stripeform">
 
       <div class="form-row">
           <input size="10" type="text" data-tid="qgis.name" name="donorname" placeholder="Name (only used in donors list)">
