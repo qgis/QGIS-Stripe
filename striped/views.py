@@ -50,6 +50,7 @@ def chargejson():
         amount=amount,
         currency=currency,
         description='QGIS Donation',
+        receipt_email=email,
         metadata={'email': email, 'donorname': donorname}
     )
 
