@@ -68,7 +68,7 @@
       </div>
 
       <div class="form-row">
-        <input name="email" data-tid="stripeEmail" type="email" placeholder="Email (email only used for sending receipt)" required="">
+        <input name="email" id="stripe-email" data-tid="stripeEmail" type="email" placeholder="Email (email only used for sending receipt)" required="">
       </div>
 
       <div class="form-row">
@@ -107,6 +107,10 @@
             document.getElementById("submit-button").disabled = false;
         }
 
+        function isCaptchaChecked() {
+            return grecaptcha && grecaptcha.getResponse().length !== 0;
+        }
+
         // Custom styling can be passed to options when creating an Element.
         var style = {
           base: {
@@ -133,7 +137,9 @@
         var form = document.getElementById('stripeform');
         form.addEventListener('submit', function(event) {
           event.preventDefault();
-
+          if (!isCaptchaChecked() || !document.getElementById('stripe-email').value) {
+              return false;
+          }
           stripe.createToken(card).then(function(result) {
             if (result.error) {
               // Inform the customer that there was an error.
