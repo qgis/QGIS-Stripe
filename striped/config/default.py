@@ -22,3 +22,9 @@ STRIPE_FORM_URL = os.environ.get('STRIPE_FORM_URL') \
 STRIPE_CHARGE_URL = os.environ.get('STRIPE_CHARGE_URL') \
     if os.environ.get('STRIPE_CHARGE_URL', False) else \
     '/stripe/chargejson'
+
+GOOGLE_RECAPTCHA_KEY = (
+    os.environ.get('GOOGLE_RECAPTCHA_KEY') if
+    os.environ.get('GOOGLE_RECAPTCHA_KEY', False) else
+    'GOOGLE_RECAPTCHA_KEY'
+)

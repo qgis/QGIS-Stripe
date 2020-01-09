@@ -25,6 +25,7 @@ def form():
     # make sure you have the properties STRIPE_PUBLISHABLE_KEY and STRIPE_CHARGE_URL in your config !
     return render_template('stripeform.html',
                            key=app.config['STRIPE_PUBLISHABLE_KEY'],
+                           recaptcha_key=app.config['GOOGLE_RECAPTCHA_KEY'],
                            stripechargeurl=app.config['STRIPE_CHARGE_URL'])
 
 @app.route('/chargejson', methods=['POST'])
