@@ -64,7 +64,10 @@ If you want to test production keys, you HAVE TO server from https page::
    console.log(data)
  });
 
+About Recaptcha: https://github.com/qgis/QGIS-Stripe/pull/1
 
+1. Generate reCAPTCHA key v2 https://www.google.com/recaptcha/admin
+2. Set environment variable for GOOGLE_RECAPTCHA_KEY with generated SITE KE
 
 https://elasticcompute.io/2016/01/21/runtime-secrets-with-docker-containers/
 
