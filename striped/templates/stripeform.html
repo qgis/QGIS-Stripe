@@ -128,7 +128,7 @@
                 donationAmount: donationAmount
             }
 
-            fetch('/create-checkout-session', {
+            fetch('{{ stripecheckouturl }}', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

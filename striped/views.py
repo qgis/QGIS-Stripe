@@ -10,8 +10,6 @@ def create_checkout_session():
     donation_quantity = 1
     donation_amount = int(content['donationAmount'])
     donation_currency = content['donationCurrency']
-    referrer = request.referrer
-    base_url = referrer[:referrer.rfind('/')]
 
     session = stripe.checkout.Session.create(
         payment_method_types=['card'],
@@ -26,22 +24,16 @@ def create_checkout_session():
             'quantity': donation_quantity,
         }],
         mode='payment',
-        success_url='{}/success-checkout'.format(base_url),
-        cancel_url=referrer
+        success_url='{}?payment_success=True'.format(
+            app.config['QGIS_DONATION_URL']),
+        cancel_url=app.config['QGIS_DONATION_URL']
     )
     return jsonify(id=session.id)
 
 
-@app.route('/success-checkout')
-def success():
-    return redirect(
-        "https://qgis.org/en/site/getinvolved/donations.html?payment_success=True",
-        code=302
-    )
-
 @app.route('/')
 def index():
-    return redirect("https://qgis.org/en/site/getinvolved/donations.html", code=302)
+    return redirect(app.config['QGIS_DONATION_URL'], code=302)
 
 
 @app.route('/test')
@@ -57,4 +49,4 @@ def form():
     return render_template('stripeform.html',
                            key=app.config['STRIPE_PUBLISHABLE_KEY'],
                            recaptcha_key=app.config['GOOGLE_RECAPTCHA_KEY'],
-                           stripechargeurl=app.config['STRIPE_CHARGE_URL'])
+                           stripecheckouturl=app.config['STRIPE_CHECKOUT_URL'])
