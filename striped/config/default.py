@@ -19,9 +19,13 @@ STRIPE_FORM_URL = os.environ.get('STRIPE_FORM_URL') \
     if os.environ.get('STRIPE_FORM_URL', False) else \
     '/stripe/form'
 
-STRIPE_CHARGE_URL = os.environ.get('STRIPE_CHARGE_URL') \
-    if os.environ.get('STRIPE_CHARGE_URL', False) else \
-    '/stripe/chargejson'
+STRIPE_CHECKOUT_URL = os.environ.get('STRIPE_CHECKOUT_URL') \
+    if os.environ.get('STRIPE_CHECKOUT_URL', False) else \
+    '/stripe/create-checkout-session'
+
+QGIS_DONATION_URL = os.environ.get('QGIS_DONATION_URL') \
+    if os.environ.get('QGIS_DONATION_URL', False) else \
+    'https://www.qgis.org/en/site/getinvolved/donations.html'
 
 GOOGLE_RECAPTCHA_KEY = (
     os.environ.get('GOOGLE_RECAPTCHA_KEY') if
