@@ -2,6 +2,7 @@
 {% block content %}
     <!-- see https://stripe.com/docs/stripe-js/reference#element-types -->
     <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+    <script src="https://js.stripe.com/v3/"></script>
     <style>
         .qgis_stripe_form {
             max-width: 500px;
@@ -49,8 +50,16 @@
             box-shadow: none;
             background: #d1d4ff;
         }
-        #card-element {
-            padding: 10px 0 10px 0;
+        #stripeErrorMessage {
+            color: #d61313;
+            background-color: #fff5f5;
+            padding: 5px;
+            border: 1px solid #ffa7a7;
+            border-radius: 4px;
+            font-size: 10pt;
+            margin-top: 10px;
+            margin-right: 10px;
+            display: none;
         }
     </style>
     <div class="qgis_stripe_form">
@@ -59,49 +68,92 @@
         {% endif %}
     </div>
     <div class="qgis_stripe_form">
-    <img src="https://qgis.org/en/_downloads/qgis-logo.png"/>
-    <div id="stripeprocessing"><!-- placeholder for processing message --></div>
-    <form id="stripeform">
-
-      <div class="form-row">
-          <input size="10" type="text" data-tid="qgis.name" name="donorname" placeholder="Name (only used in donors list)">
-      </div>
-
-      <div class="form-row">
-        <input name="email" id="stripe-email" data-tid="stripeEmail" type="email" placeholder="Email (email only used for sending receipt)" required="">
-      </div>
-
-      <div class="form-row">
-
-        <select name="amount" data-tid="qgis.amount">
-            <!-- NOTE: amount value is in CENTS !!!-->
-            <option value="eur:1000" selected>€ 10.00</option>
-            <option value="eur:2500">€ 25.00</option>
-            <option value="eur:5000">€ 50.00</option>
-            <option value="eur:10000">€ 100.00</option>
-            <option value="eur:25000">€ 250.00 (contact finance@qgis.org for higher amounts)</option>
-            <option value="usd:1000">$ 10.00</option>
-            <option value="usd:2500">$ 25.00</option>
-            <option value="usd:5000">$ 50.00</option>
-            <option value="usd:10000">$ 100.00</option>
-            <option value="usd:25000">$ 250.00 (contact finance@qgis.org for higher amounts)</option>
-        </select>
-
-      </div>
-
-      <div class="form-row">
-        <div id="card-element"><!-- A Stripe Element will be inserted here. --></div>
-        <div id="card-errors" role="alert"><!-- Used to display Element errors. --></div>
-      </div>
-      <div class="g-recaptcha" data-sitekey="{{ recaptcha_key }}" data-callback="enableSubmitBtn"></div>
-      <input type="submit" value="Submit Payment Form" id="submit-button" disabled>
-    </form>
+        <img src="https://www.qgis.org/en/_static/logo.png"/>
+        <div id="stripeErrorMessage"></div>
+        <div class="form-row" style="padding-top: 5px; padding-bottom: 10px;">
+            <select name="amount" data-tid="qgis.amount" id="donationAmount">
+                <!-- NOTE: amount value is in CENTS !!!-->
+                <option value="eur:1000" selected>€ 10.00</option>
+                <option value="eur:2500">€ 25.00</option>
+                <option value="eur:5000">€ 50.00</option>
+                <option value="eur:10000">€ 100.00</option>
+                <option value="eur:25000">€ 250.00 (contact finance@qgis.org
+                    for
+                    higher amounts)
+                </option>
+                <option value="usd:1000">$ 10.00</option>
+                <option value="usd:2500">$ 25.00</option>
+                <option value="usd:5000">$ 50.00</option>
+                <option value="usd:10000">$ 100.00</option>
+                <option value="usd:25000">$ 250.00 (contact finance@qgis.org
+                    for
+                    higher amounts)
+                </option>
+            </select>
+        </div>
+        <div class="g-recaptcha" data-sitekey="{{ recaptcha_key }}"
+             data-callback="enableSubmitBtn"></div>
+        <button id="submit-button" disabled>Checkout</button>
     </div>
     <script src="https://www.google.com/recaptcha/api.js?onload=onloadCallback&render=explicit"
             async defer></script>
     <script>
-        var stripe = Stripe('{{ key }}');
-        var elements = stripe.elements();
+        let stripe = Stripe('{{ key }}');
+        let elements = stripe.elements();
+
+        (function () {
+            setTimeout(function () {
+                const queryString = window.location.search;
+                const urlParams = new URLSearchParams(queryString);
+                const success = urlParams.get('payment_success')
+                if (success && success === 'True') {
+                    window.history.pushState("object or string", "Title", "/" + window.location.href.substring(window.location.href.lastIndexOf('/') + 1).split("?")[0]);
+                    document.getElementById('thankyou').style.display = 'block';
+                }
+            }, 2000)
+        })();
+
+        let checkoutButton = document.getElementById('submit-button');
+
+        checkoutButton.addEventListener('click', function () {
+            if (!isCaptchaChecked) {
+                return;
+            }
+            let donationAmountSelect = document.getElementById("donationAmount");
+            let donationValue = donationAmountSelect.value.split(':');
+            let donationCurrency = donationValue[0];
+            let donationAmount = donationValue[1];
+            const postData = {
+                donationCurrency: donationCurrency,
+                donationAmount: donationAmount
+            }
+
+            fetch('/create-checkout-session', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(postData)
+            })
+                .then(function (response) {
+                    return response.json();
+                })
+                .then(function (session) {
+                    return stripe.redirectToCheckout({sessionId: session.id});
+                })
+                .then(function (result) {
+                    // If `redirectToCheckout` fails due to a browser or network
+                    // error, you should display the localized error message to your
+                    // customer using `error.message`.
+                    if (result.error) {
+                        document.getElementById('stripeErrorMessage').style.display = 'block';
+                        document.getElementById('stripeErrorMessage').innerHTML = result.error.message;
+                    }
+                })
+                .catch(function (error) {
+                    console.log(error);
+                });
+        });
 
         function enableSubmitBtn(){
             document.getElementById("submit-button").disabled = false;
@@ -109,78 +161,6 @@
 
         function isCaptchaChecked() {
             return grecaptcha && grecaptcha.getResponse().length !== 0;
-        }
-
-        // Custom styling can be passed to options when creating an Element.
-        var style = {
-          base: {
-            fontSize: '16px',
-          }
-        };
-
-        // Create an instance of the card Element.
-        var card = elements.create('card', {style: style, hidePostalCode:true});
-
-        // Add an instance of the card Element into the `card-element` <div>.
-        card.mount('#card-element');
-
-        card.addEventListener('change', function(event) {
-          var displayError = document.getElementById('card-errors');
-          if (event.error) {
-            displayError.textContent = event.error.message;
-          } else {
-            displayError.textContent = '';
-          }
-        });
-
-        // Create a token or display an error when the form is submitted.
-        var form = document.getElementById('stripeform');
-        form.addEventListener('submit', function(event) {
-          event.preventDefault();
-          if (!isCaptchaChecked() || !document.getElementById('stripe-email').value) {
-              return false;
-          }
-          stripe.createToken(card).then(function(result) {
-            if (result.error) {
-              // Inform the customer that there was an error.
-              var errorElement = document.getElementById('card-errors');
-              errorElement.textContent = result.error.message;
-            } else {
-              // Send the token to your server.
-              stripeTokenHandler(result.token);
-            }
-          });
-        });
-
-        function stripeTokenHandler(token) {
-          // Insert the token ID into the form so it gets submitted to the server
-          var form = document.getElementById('stripeform');
-          var hiddenInput = document.createElement('input');
-          hiddenInput.setAttribute('type', 'hidden');
-          hiddenInput.setAttribute('name', 'stripeToken');
-          hiddenInput.setAttribute('value', token.id);
-          form.appendChild(hiddenInput);
-
-          // Submit the form via ajax call, but first hide form and show 'waiting' msg
-          $('#stripeform').hide();
-          $('#stripeprocessing').html('<p><b>PROCESSING PAYMENT REQUEST ...</b></p>');
-          $.post( '{{ stripechargeurl }}', $('form#stripeform').serialize(), function(data) {
-              console.log(data);
-              if (data.result=='ok'){
-                  $('#stripemsg').prepend('<p>'+data.donation+'</p>');
-                  $('#thankyou').show();
-                  $('#stripeprocessing').html('<p><b>Reload page to donate again :-)</b></p>');
-              }
-              else if (data.result=='error') {
-                  // data.result.errormsg
-                  $('#stripemsg').hide();
-                  $('#stripeerr').show();
-                  $('#thankyou').show();
-              }
-            },
-            'json' // I expect a JSON response
-          );
-          return false; // else the page is submitted!
         }
 
     </script>
