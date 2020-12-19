@@ -1,3 +1,4 @@
 Flask==1.0.2
 stripe==2.55.1
 gunicorn==19.8.1
+requests==2.22.0

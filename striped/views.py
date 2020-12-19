@@ -1,6 +1,19 @@
-from striped import app
-from flask import render_template, request, redirect, jsonify, url_for, json
 import stripe
+import requests
+from flask import render_template, request, redirect, jsonify, abort, json
+from striped import app
+
+
+def _verify_recaptcha(token):
+    url = 'https://www.google.com/recaptcha/api/siteverify'
+    post_data = {
+        'secret': app.config['GOOGLE_RECAPTCHA_SECRET_KEY'],
+        'response': token
+    }
+    response = requests.post(url, data=post_data)
+    response_obj = json.loads(response.text)
+    if not response_obj['success']:
+        abort(400, description='Illegal captcha request')
 
 
 @app.route('/create-checkout-session', methods=['POST'])
@@ -10,6 +23,9 @@ def create_checkout_session():
     donation_quantity = 1
     donation_amount = int(content['donationAmount'])
     donation_currency = content['donationCurrency']
+    recaptcha_token = content['recaptchaToken']
+
+    _verify_recaptcha(recaptcha_token)
 
     session = stripe.checkout.Session.create(
         payment_method_types=['card'],
@@ -31,6 +47,14 @@ def create_checkout_session():
     return jsonify(id=session.id)
 
 
+@app.errorhandler(400)
+def custom400(error):
+    response = jsonify({'message': error.description})
+    response.status_code = 400
+    response.status = error.description
+    return response
+
+
 @app.route('/')
 def index():
     return redirect(app.config['QGIS_DONATION_URL'], code=302)
@@ -49,4 +73,5 @@ def form():
     return render_template('stripeform.html',
                            key=app.config['STRIPE_PUBLISHABLE_KEY'],
                            recaptcha_key=app.config['GOOGLE_RECAPTCHA_KEY'],
+                           donation_url=app.config['QGIS_DONATION_URL'],
                            stripecheckouturl=app.config['STRIPE_CHECKOUT_URL'])
