@@ -32,3 +32,9 @@ GOOGLE_RECAPTCHA_KEY = (
     os.environ.get('GOOGLE_RECAPTCHA_KEY', False) else
     'GOOGLE_RECAPTCHA_KEY'
 )
+
+GOOGLE_RECAPTCHA_SECRET_KEY = (
+    os.environ.get('GOOGLE_RECAPTCHA_SECRET_KEY') if
+    os.environ.get('GOOGLE_RECAPTCHA_SECRET_KEY', False) else
+    'GOOGLE_RECAPTCHA_SECRET_KEY'
+)

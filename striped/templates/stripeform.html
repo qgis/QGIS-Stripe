@@ -71,6 +71,7 @@
         <img src="https://www.qgis.org/en/_static/logo.png"/>
         <div id="stripeErrorMessage"></div>
         <div class="form-row" style="padding-top: 5px; padding-bottom: 10px;">
+            <div class="smalltext">Donation Amount</div>
             <select name="amount" data-tid="qgis.amount" id="donationAmount">
                 <!-- NOTE: amount value is in CENTS !!!-->
                 <option value="eur:1000" selected>€ 10.00</option>
@@ -100,6 +101,7 @@
     <script>
         let stripe = Stripe('{{ key }}');
         let elements = stripe.elements();
+        let recaptchaToken = null;
 
         (function () {
             setTimeout(function () {
@@ -107,10 +109,10 @@
                 const urlParams = new URLSearchParams(queryString);
                 const success = urlParams.get('payment_success')
                 if (success && success === 'True') {
-                    window.history.pushState("object or string", "Title", "/" + window.location.href.substring(window.location.href.lastIndexOf('/') + 1).split("?")[0]);
+                    window.history.pushState("object or string", "Title", '{{ donation_url }}');
                     document.getElementById('thankyou').style.display = 'block';
                 }
-            }, 2000)
+            }, 500)
         })();
 
         let checkoutButton = document.getElementById('submit-button');
@@ -125,7 +127,8 @@
             let donationAmount = donationValue[1];
             const postData = {
                 donationCurrency: donationCurrency,
-                donationAmount: donationAmount
+                donationAmount: donationAmount,
+                recaptchaToken: recaptchaToken
             }
 
             fetch('{{ stripecheckouturl }}', {
@@ -136,7 +139,12 @@
                 body: JSON.stringify(postData)
             })
                 .then(function (response) {
-                    return response.json();
+                    if (response.ok) {
+                        return response.json();
+                    } else {
+                        document.getElementById('stripeErrorMessage').style.display = 'block';
+                        document.getElementById('stripeErrorMessage').innerHTML = response.statusText;
+                    }
                 })
                 .then(function (session) {
                     return stripe.redirectToCheckout({sessionId: session.id});
@@ -155,12 +163,13 @@
                 });
         });
 
-        function enableSubmitBtn(){
+        function enableSubmitBtn(response){
             document.getElementById("submit-button").disabled = false;
+            recaptchaToken = response;
         }
 
         function isCaptchaChecked() {
-            return grecaptcha && grecaptcha.getResponse().length !== 0;
+            return grecaptcha && grecaptcha.getResponse().length !== 0 && recaptchaToken;
         }
 
     </script>
