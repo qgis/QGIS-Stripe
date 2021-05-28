@@ -1,9 +1,11 @@
 from flask import Flask
+from flask_cors import CORS
 from striped import config
 import stripe
 
 
 app = Flask(__name__)
+CORS(app)
 
 # CONFIGURATION
 # See: http://flask.pocoo.org/docs/1.0/config/
