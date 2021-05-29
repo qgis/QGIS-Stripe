@@ -5,13 +5,16 @@ import stripe
 
 
 app = Flask(__name__)
-CORS(app)
-
 # CONFIGURATION
 # See: http://flask.pocoo.org/docs/1.0/config/
 
 # default config from config.default.py (or environment)
 app.config.from_object(config.default)
+
+cors = CORS(
+    app,
+    origins=app.config['CORS_ORIGINS']
+)
 
 # configuration (ini file type) overriding default config
 # file should be in an 'instance' folder in application instance root

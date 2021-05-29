@@ -47,6 +47,20 @@ def create_checkout_session():
     return jsonify(id=session.id)
 
 
+@app.route('/stripe-key')
+def get_stripe_key():
+    return jsonify({
+        'key': app.config['STRIPE_PUBLISHABLE_KEY']
+    })
+
+
+@app.route('/recaptcha-key')
+def get_recaptcha_key():
+    return jsonify({
+        'key': app.config['GOOGLE_RECAPTCHA_KEY']
+    })
+
+
 @app.errorhandler(400)
 def custom400(error):
     response = jsonify({'message': error.description})
