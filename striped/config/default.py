@@ -38,3 +38,9 @@ GOOGLE_RECAPTCHA_SECRET_KEY = (
     os.environ.get('GOOGLE_RECAPTCHA_SECRET_KEY', False) else
     'GOOGLE_RECAPTCHA_SECRET_KEY'
 )
+
+CORS_ORIGINS = (
+    os.environ.get('CORS_ORIGINS').split(',') if
+    os.environ.get('CORS_ORIGINS', False) else
+    ['https://donate.qgis.org']
+)
