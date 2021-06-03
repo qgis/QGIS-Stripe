@@ -8,3 +8,5 @@ web:
   volumes:
     - ./striped:/striped
     - ./logs:/logs
+  environment:
+    - CORS_ORIGINS=https://donate.qgis.org
