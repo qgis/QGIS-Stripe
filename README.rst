@@ -84,18 +84,19 @@ Testing for errors:
 - invalid_expiry_year: Use a year in the past (e.g., 1970)
 - invalid_cvc: Use a two digit number (e.g., 99)
 
-# Deploying changes
+Deploying changes
+-----------------
 
 If you make any config changes you need to do
 
-```
+``
 docker exec -ti qgis_stripe
-```
+``
 
 Then edit the ``/striped/config/live.py`` config file
 
 Then restart the container.
 
-```
+``
 docker restart qgis_stripe
-```
+``
